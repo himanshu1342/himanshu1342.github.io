@@ -1,0 +1,854 @@
+var cmbNo=0;
+
+function showRejectForm(caller){
+	$("#rejFormDiv").hide();
+	$("#accptFormDiv").show();
+
+	$.ajax({
+		url:'getPlacementRegistrationReason.json',
+		dataType:'json',
+		async:false,
+		success:function(jArray){
+
+			var boiler1='';
+
+			boiler1 +='<table class="table table-striped table-bordered table-condensed">'+
+			'<tr>'+
+			'<th>'+
+			'Reason of rejection placement:'+
+			'</th>'+
+			'<td style="display:none;"><input type="text" id="txtHiddenPlacementRegRejId" /></td>'+
+			'</tr>'+
+			'</table>'+
+			'<table class="table table-striped table-bordered table-condensed">';
+
+
+			for(var i=0; i<jArray.length; i++){
+
+				boiler1 +=
+					'<tr>'+
+					'<td width="30px;">'+
+					'<input type="checkbox" id="chk'+jArray[i]["placementRegistrationReasonId"]+'" name="reason" value="'+jArray[i]["placementRegistrationReasonId"]+'" /></td><td><label>'+jArray[i]["type"]+'</label>'+
+					'</td>'+
+					'</tr>';
+			}
+			if(caller=="side"){
+				boiler1 +=
+					'<tr>'+
+					'<td colspan="2">'+
+					'<input type="button" id="btnSave" value="Save" class="btn btn-inverse btn-mini  " onclick="savePlacemenRegistrationRejReq()"/>'+
+					'</td>'+
+					'</tr>';
+			}
+			boiler1+='</table>';		
+
+			$('#accptFormDiv').html(boiler1);
+			$('#placementRejectRegistrationBody').html(boiler1);
+
+		},
+		error:function(){
+			////alert("in Error stream CMB");
+		}
+	});
+}
+
+function savePlacemenRegistrationRejReq1(){
+	//var reqId=$("#txyRegId").val();
+	//alert("reqId..."+reqId);
+	var reqId="";
+	var reason=new Array();
+	var cnt=0;
+	var grescore="0";
+	var toefeelscore="0"
+		jConfirm("Do you wish to continue with opt out process from placement ? ", "Confirm", function(result) {
+		if (result == true) {
+			if($("#textareaReason").val()=="" && $("#textareaReason").val()==""){
+				jAlert("Please enter valid reason");
+				return false;
+			}
+		if($("#greScore").val()=="" && $("#toefelScore").val()==""){
+			jAlert("please add GRE/TOEFEEL Score");
+			return false;
+		}else{
+			
+			
+			
+				grescore=$("#greScore").val();	
+				toefeelscore=$("#toefelScore").val();
+			
+			$.ajax({
+				url:'savePlacemenRegistrationRejReq.json?reason='+$('#textareaReason').val()+'&reqId='+reqId+'&grescore='+grescore+'&toefeelscore='+toefeelscore,
+				dataType:'json',
+				async:false,
+				success:function(jArray){
+					$('#placementAcceptRegistration').modal('hide');
+					jAlert("Opt Out Successfully");
+					location.reload(true);
+				},
+				error:function(){
+					////alert("in Error stream CMB");
+				}
+			});
+		}
+			}else {
+				return false;
+			}
+			});
+	
+	
+}
+
+function savePlacemenRegistrationRejReq(){
+	//var reqId=$("#txyRegId").val();
+	//alert("reqId..."+reqId);
+	var reqId="";
+	var reason=new Array();
+	var cnt=0;
+	
+			$.ajax({
+				url:'savePlacemenRegistrationRejReq.json?reason='+reason+'&reqId='+reqId,
+				dataType:'json',
+				async:false,
+				success:function(jArray){
+					$('#placementAcceptRegistration').modal('hide');
+					jAlert("Saved Successfully");
+				},
+				error:function(){
+					////alert("in Error stream CMB");
+				}
+			});
+		
+	
+	/*$('input[name = "reason"]:checked').each(function(){
+		cnt++;
+		reason.push($(this).val());
+	});*/
+//	if(cnt==1){
+	
+	//}
+	/*else{
+		jAlert("Please select only one reason");
+	}*/
+}
+function savePlacemenRegistrationAcceptedReq(){
+	//var sDate=$("#txtStartDate").val();
+	//var eDate=$("#txtEndDate").val();
+	/*if(sDate=="" || eDate==""){
+		jAlert("Please select Start Date and End Date");
+	}
+	else{*/
+	//alert($("#txyRegId").val());
+		var reqId="";
+		if($("#txyRegId").val() != undefined)
+			{
+				reqId = $("#txyRegId").val(); 
+			}
+		var cmbComp1="";
+		var cmbComp2="";
+		var cmbComp3="";
+		var cmbComp4="";
+		var cmbComp5="";
+		var cmbComp6="";
+
+		/*if($("#cmbComp1").val()!=0){
+			cmbComp1=$("#cmbComp1").val();
+		}
+
+		if($("#cmbComp2").val()!=0){
+			cmbComp2=$("#cmbComp2").val();
+		}
+
+		if($("#cmbComp3").val()!=0){
+			cmbComp3=$("#cmbComp3").val();
+		}
+
+		if($("#cmbComp4").val()!=0){
+			cmbComp4=$("#cmbComp4").val();
+		}
+
+		if($("#cmbComp5").val()!=0){
+			cmbComp5=$("#cmbComp5").val();
+		}
+
+		if($("#cmbComp6").val()!=0){
+			cmbComp6=$("#cmbComp6").val();
+		}
+*/
+		$.ajax({
+			url:'savePlacemenRegistrationAcceptedReq.json?cmbComp1='+cmbComp1+'&cmbComp2='+cmbComp2+'&cmbComp3='+cmbComp3+'&cmbComp4='+cmbComp4+'&cmbComp5='+cmbComp5+'&cmbComp6='+cmbComp6+'&reqId='+reqId,
+			dataType:'json',
+			async:false,
+			success:function(jArray){
+				jAlert("Saved Successfully");
+				location.reload(true);
+				//window.location.href = "MyPlacements.htm?hType=placement";
+			},
+			error:function(){
+				////alert("in Error stream CMB");
+			}
+		});
+	//}
+}
+
+function showAcceptForm(caller){
+	$("#accptFormDiv").hide();
+	$("#rejFormDiv").show();
+	var boiler1='';
+	boiler1 +='<table class="table table-striped table-bordered table-condensed">'+
+	'<tr>'+
+	/*'<th>'+
+	'Request for placement:'+
+	'</th>'+*/
+	'<td style="display:none;"><input type="text" id="txtHiddenPlacementRegAccptId" /></td>'+
+	'</tr>'+
+	'</table>'+
+
+	'<table class="table table-striped table-bordered table-condensed">'+
+	'<tr>'+
+	'<th>'+
+	'Dream Companies :'+
+	'</th>'+
+	'</tr>'+
+	'</table>'+
+
+	'<table class="table table-striped table-bordered table-condensed">'+
+
+	'<tr>'+
+	'<td>'+
+	'1.&nbsp;<select id="cmbComp1" onchange="addOherCompanyPopUp1()">'+
+	'</td>'+
+	'<td>'+
+	'2.&nbsp;<select id="cmbComp2" onchange="addOherCompanyPopUp2()">'+
+	'</td>'+
+	'</tr>'+
+
+	'<tr>'+
+	'<td>'+
+	'3.&nbsp;<select id="cmbComp3" onchange="addOherCompanyPopUp3()">'+
+	'</td>'+
+	'<td>'+
+	'4.&nbsp;<select id="cmbComp4" onchange="addOherCompanyPopUp4()">'+
+	'</td>'+
+	'</tr>'+
+
+	'<tr>'+
+	'<td>'+
+	'5.&nbsp;<select id="cmbComp5" onchange="addOherCompanyPopUp5()">'+
+	'</td>'+
+	'<td>'+
+	'6.&nbsp;<select id="cmbComp6" onchange="addOherCompanyPopUp6()">'+
+	'</td>'+
+	'</tr>';
+	if(caller=="side"){
+		boiler1+='<tr>'+
+		'<td colspan="2">'+
+		'<input type="button" id="btnSave2" value="Save" class="btn btn-inverse btn-mini  " onclick="savePlacemenRegistrationAcceptedReq()"/>'+
+		'</td>'+
+		'</tr>';
+	}
+
+
+	boiler1+='</table>';		
+
+	$('#rejFormDiv').html(boiler1);
+	$('#placementAcceptRegistrationBody').html(boiler1);
+
+	jQuery('#txtStartDate').datepicker(
+			{
+				dateFormat:"M d,yy",
+				///showWeek: true,
+				changeMonth: true,
+				changeYear: true,
+				yearRange:"-60:+5",
+			});
+
+	jQuery('#txtEndDate').datepicker(
+			{
+				dateFormat:"M d,yy",
+				///showWeek: true,
+				changeMonth: true,
+				changeYear: true,
+				yearRange:"-60:+5",
+			});
+
+	cmbNo=0;
+	getCompanyList(cmbNo);
+}
+
+function getCompanyList(cmbNo){
+
+	$.ajax({
+		url:'GETCompanyList.json',
+		dataType:'json',
+		async:false,
+		success:function(jArray){
+
+			var j=jArray.length;
+			var companyComboBoiler='<option value="0">Select</option>';
+			for(var i=0;i<j;i++)
+				companyComboBoiler +='<option value="'+jArray[i]["companyMasterId"]+'">'+jArray[i]["companyName"]+'</option>';
+
+			companyComboBoiler +='<option value="addNew">Add New</option>';
+
+			if(cmbNo==0){
+				$('#cmbComp1').html(companyComboBoiler);
+				$('#cmbComp2').html(companyComboBoiler);
+				$('#cmbComp3').html(companyComboBoiler);
+				$('#cmbComp4').html(companyComboBoiler);
+				$('#cmbComp5').html(companyComboBoiler);
+				$('#cmbComp6').html(companyComboBoiler);
+			}
+
+			if(cmbNo==1)
+				$('#cmbComp1').html(companyComboBoiler);
+
+			if(cmbNo==2)
+				$('#cmbComp2').html(companyComboBoiler);
+
+			if(cmbNo==3)
+				$('#cmbComp3').html(companyComboBoiler);
+
+			if(cmbNo==4)
+				$('#cmbComp4').html(companyComboBoiler);
+
+			if(cmbNo==5)
+				$('#cmbComp5').html(companyComboBoiler);
+
+			if(cmbNo==6)
+				$('#cmbComp6').html(companyComboBoiler);
+
+		},
+		error:function(){
+			////alert("in Error stream CMB");
+		}
+	});
+}
+
+
+function getPlaceRegReqDetail(){
+
+	$.ajax({
+		url:'getPlaceRegReqDetail.json',
+		dataType:'json',
+		async:false,
+		success:function(jArray){
+			if(jArray.length>0)
+			if(jArray[0]["acceptRej"]=="Accept"){
+				showAcceptForm("side");
+				//alert("val...."+jArray[0]["id"]);
+
+				$('#radAccept').attr('checked',true);
+
+				$("#txyRegId").val(jArray[0]["id"]);
+
+				var pubDate = new Date(jArray[0]["startDate"]);
+				$('#txtStartDate').datepicker({
+					dateFormat : 'M d,yy',
+				});
+				$("#txtStartDate").datepicker('setDate', pubDate);
+
+				var pubDate2 = new Date(jArray[0]["endDate"]);
+				$('#txtEndDate').datepicker({
+					dateFormat : 'M d,yy',
+				});
+				$("#txtEndDate").datepicker('setDate', pubDate2);
+
+				$("#cmbComp1").val(jArray[0]["dreamCompId1"]);
+				$("#cmbComp2").val(jArray[0]["dreamCompId2"]);
+				$("#cmbComp3").val(jArray[0]["dreamCompId3"]);
+				$("#cmbComp4").val(jArray[0]["dreamCompId4"]);
+				$("#cmbComp5").val(jArray[0]["dreamCompId5"]);
+				$("#cmbComp6").val(jArray[0]["dreamCompId6"]);
+			}
+			else{
+				showRejectForm("side");
+				//alert("val2...."+jArray[0]["id"]);
+				$('#radReject').attr('checked',true);
+
+				$("#txyRegId").val(jArray[0]["id"]);
+				$("#chk"+jArray[0]["reasonId"]).attr('checked',true);
+
+
+			}
+
+		},
+		error:function(){
+			////alert("in Error stream CMB");
+		}
+	});
+}
+
+function addOherCompanyPopUp1(){
+	cmbNo=1;
+	if($("#cmbComp1").val()=="addNew"){
+		//clearForm('addOtherCompanyPopUp');
+		$('#addOtherCompanyPopUp').modal('show').css({
+			width: '600px',
+			'margin-left': function () {
+				return -($(this).width() / 2);
+			}
+		});
+	}
+}	
+
+function addOherCompanyPopUp2(){	
+	cmbNo=2;
+	if($("#cmbComp2").val()=="addNew"){
+		//clearForm('addOtherCompanyPopUp');
+		$('#addOtherCompanyPopUp').modal('show').css({
+			width: '600px',
+			'margin-left': function () {
+				return -($(this).width() / 2);
+			}
+		});
+	}
+}
+
+function addOherCompanyPopUp3(){
+	cmbNo=3;
+	if($("#cmbComp3").val()=="addNew"){
+		//clearForm('addOtherCompanyPopUp');
+		$('#addOtherCompanyPopUp').modal('show').css({
+			width: '600px',
+			'margin-left': function () {
+				return -($(this).width() / 2);
+			}
+		});
+	}
+}	
+
+function addOherCompanyPopUp4(){	
+	cmbNo=4;
+	if($("#cmbComp4").val()=="addNew"){
+		//clearForm('addOtherCompanyPopUp');
+		$('#addOtherCompanyPopUp').modal('show').css({
+			width: '600px',
+			'margin-left': function () {
+				return -($(this).width() / 2);
+			}
+		});
+	}
+}
+
+function addOherCompanyPopUp5(){
+	cmbNo=5;
+	if($("#cmbComp5").val()=="addNew"){
+		//clearForm('addOtherCompanyPopUp');
+		$('#addOtherCompanyPopUp').modal('show').css({
+			width: '600px',
+			'margin-left': function () {
+				return -($(this).width() / 2);
+			}
+		});
+	}
+}
+
+function addOherCompanyPopUp6(){
+	cmbNo=6;
+	if($("#cmbComp6").val()=="addNew"){
+		//clearForm('addOtherCompanyPopUp');
+		$('#addOtherCompanyPopUp').modal('show').css({
+			width: '600px',
+			'margin-left': function () {
+				return -($(this).width() / 2);
+			}
+		});
+	}
+}
+
+function saveAnotherCompInPopUpThroughStud(){
+	var companyName=$("#txtOtherCompanyName").val();
+	$.ajax({
+		url:'saveAnotherCompInPopUpThroughStud.json?companyName='+companyName,
+		dataType:'json',
+		async:false,
+		success:function(jArray){
+			$('#addOtherCompanyPopUp').modal('hide');
+			jAlert("Added successfully. You can select now");
+			getCompanyList(cmbNo);
+
+		},
+		error:function(){
+			////alert("in Error stream CMB");
+		}
+	});
+}
+
+//functions From navCommon.jsp        to Register Students For Placements
+function checkStudentStatus() {
+	
+	$('#showCPCRulesWhileRegistratingForPlacPopUp').modal('show').css({
+		width: '600px',
+		'margin-left': function () {
+			return -($(this).width() / 2);
+		}
+	});
+	
+	var status="";
+	var StudentId = $('#StudentId').val();
+	$.ajax({
+		url : 'checkStudentActivateForPlacement.json',   // PlacementCell Controler
+		dataType : 'json',
+		type : 'GET',
+		async : false,
+		success : function(json) {
+			status=json[0]["statusJson"];
+		},
+		error : function() {
+			jAlert("Error in Getting Student Placement List..", "Error");
+		}
+	});
+	
+	if(status=="Accepted"){	
+		checkOtherQualificationStatus(); // in Student Graduation Table...
+	}
+	if(status=="NotRegistered" || status=="Rejected"){
+		jConfirm("Do You Wish to Register For Placments? ", "Confirm", function(result) {
+			if (result == true) {
+				var customerIdentifiecationObj=$('#customerHelper').val();
+				if(customerIdentifiecationObj=="ICT_MUMBAI" && customerIdentifiecationObj !=undefined){
+				window.location.href = "placementRulesForStudent.htm"
+				return false;
+				}
+				$('#placementAcceptRegistration').modal('show');
+				
+				var boiler1='';
+
+				boiler1 +='<table class="table table-striped table-bordered table-condensed">'+
+				'<tr>'+
+				'<td><u><b>Central Placement Cell Rules</b></u><br><div id="divCPCRulesForStudWhileRegisteringForPlac"></div></td>'+
+				'</tr>';
+				
+				boiler1+='<tr>'+
+							'<td><input type="button" id="btnSave2" value="Accept" class="btn btn-inverse btn-mini  " onclick="savePlacemenRegistrationAcceptedReq()"/>&nbsp;&nbsp;'+
+							'<input type="button" id="btnSave2" value="Decline" class="btn btn-inverse btn-mini  " onclick="savePlacemenRegistrationRejReq()"/>'+
+							'</td>'+
+						'</tr>';
+
+				boiler1+='</table>';		
+
+				$('#placementAcceptRegistrationBody').html(boiler1);
+				showCPCRulesInForm();
+			} else{
+				return false;
+				//savePlacemenRegistrationRejReq();
+			}
+		});
+	}
+	
+	if(status=="NotActivated"){
+		jAlert("Your batch has not been activated yet...","Warning");
+		
+		
+	}
+	if(status=="Debbared"){
+		jAlert("You have been debbared...","Warning");
+		
+	}
+		
+}
+
+function showCPCRulesInForm(){
+	$.ajax({
+		url:'getPlacementRulesForStudent.json',
+		dataType:'text',
+		async:false,
+		beforeSend: function() {
+			startCommonAjaxSpinner();
+												
+		},
+		complete: function() {
+			stopCommonAjaxSpinner();
+		},
+		success: function(jArray){
+			var boiler=''+jArray+'';
+			$("#divCPCRulesForStudWhileRegisteringForPlac").html(boiler);
+			
+		},
+		error: function(){
+			
+		}
+	});
+}
+/*
+function checkOtherQualificationStatus()
+{
+	$.ajax({
+		url : 'checkOtherQualificationStatusInStudentGraduation.json',   // PlacementCell Controler
+		dataType : 'json',
+		type : 'GET',
+		async : false,
+		success : function(jArray) {
+			
+			//$('#addOtherQualificationForPlacementDiv').modal('show');
+			
+			var graduationArray = new Array();
+			var otherQualiArray = new Array();
+			graduationArray = jArray[0]["GraduationDetai"];
+			otherQualiArray = jArray[0]["OtherQualificationArray"];
+			if(jArray.length > 0)
+			{
+				if(otherQualiArray.length > 0)
+				{
+					if(graduationArray.length > 0)
+					{
+						$('#addOtherQualificationForPlacementDiv').modal('show').css({
+							width: '700px',
+							'margin-left': function () {
+								return -($(this).width() / 2);
+							}
+						});
+						
+						var boiler = '<table class="table table-bordered">'+
+										'<tr>'+
+											'<th>Current Qualification :</th>'+
+											'<td>'+jArray[0]["currentQuali"]+'</td>'+
+										'</tr>'+
+										'<tr>'+
+											'<td colspan="2" id="qualiTD"></td>'+
+										'</tr>'+
+									 '</table>';
+						
+						$('#addOtherQualificationForPlacementBody').html(boiler);
+						var innerBoiler = '<table class="table table-bordered">';
+					   for(var i=0;i<graduationArray.length;i++)
+					   {	
+						   innerBoiler += '<tr id="'+graduationArray[i]["studentGraduationId"]+'" class="graduationIdTrcls" >'+
+						   						'<th>Select your equivalent to <b><u> ('+graduationArray[i]["degreeName"]+') </u></b> graduation/PG/diploma qualification from the following</th>'+
+						   				  '</tr>'+
+						   				  '<tr>'+
+						   				  		'<td>'+
+						   				  		'<div class="listWrapper" id="div_'+graduationArray[i]["studentGraduationId"]+'" >'+
+						   				  			'<ul style="list-style: none;">';
+													   for(var j=0;j<otherQualiArray.length;j++)
+														{
+														   if(otherQualiArray[j]["DegreeName"] != "Any Degree")
+														   {
+															   innerBoiler += '<li style="width:15em;" ><input type="radio" class="rdoOtherQuali_'+graduationArray[i]["studentGraduationId"]+'" name="rdoOtherQuali_'+graduationArray[i]["studentGraduationId"]+'"  value="'+graduationArray[i]["studentGraduationId"]+'-'+otherQualiArray[j]["otherQualificationId"]+'">'+otherQualiArray[j]["DegreeName"]+'</li>';
+														   }
+														}
+						   		innerBoiler +=	'</ul></div></td>'+
+						   				  '</tr>';
+					   }
+					   innerBoiler += '</table>'+
+					   					'</br>'+
+					   					'<center><input type="button" value="Save" class="btn btn-inverse" onclick="saveStudOtherQualificationForPlacement()" /></center>';
+					   $('#qualiTD').html(innerBoiler);
+					}
+					else
+					{
+						//window.location.href = "";
+					}
+				}
+				else
+				{
+					//window.location.href = "";
+				}
+			}
+			else
+			{
+				//window.location.href = "";
+			}
+			
+		},
+		error : function() {
+			jAlert("Error in Getting Student Placement List..", "Error");
+		}
+	});
+}*/
+
+
+function checkOtherQualificationStatus()
+{
+	$.ajax({
+		url : 'checkOtherQualificationStatusInStudentGraduation.json',   // PlacementCell Controler
+		dataType : 'json',
+		type : 'GET',
+		async : false,
+		success : function(jArray) {
+			
+			//$('#addOtherQualificationForPlacementDiv').modal('show');
+			
+			var graduationArray = new Array();
+			var otherQualiArray = new Array();
+			graduationArray = jArray[0]["GraduationDetai"];
+			otherQualiArray = jArray[0]["OtherQualificationArray"];
+			if(jArray.length > 0)
+			{
+				if(otherQualiArray.length > 0)
+				{
+					if(graduationArray.length > 0)
+					{
+						$('#addOtherQualificationForPlacementDiv').modal('show').css({
+							width: '700px',
+							'margin-left': function () {
+								return -($(this).width() / 2);
+							}
+						});
+						
+						var boiler = '<table class="table table-bordered">'+
+										'<tr>'+
+											'<th>Current Qualification :</th>'+
+											'<td>'+jArray[0]["currentQuali"]+'</td>'+
+										'</tr>'+
+										'<tr>'+
+											'<td colspan="2" id="qualiTD"></td>'+
+										'</tr>'+
+									 '</table>';
+						
+						$('#addOtherQualificationForPlacementBody').html(boiler);
+						var innerBoiler = '<table class="table table-bordered">';
+					   for(var i=0;i<graduationArray.length;i++)
+					   {	
+						   innerBoiler += '<tr id="'+graduationArray[i]["studentGraduationId"]+'" class="graduationIdTrcls" >'+
+						   						'<th>Select your equivalent to <b><u> ('+graduationArray[i]["degreeName"]+') </u></b> graduation/PG/diploma qualification from the following</th>'+
+						   				  '</tr>'+
+						   				  '<tr>'+
+						   				  		'<td>'+
+						   				  		'<div class="listWrapper" id="div_'+graduationArray[i]["studentGraduationId"]+'" >'+
+						   				  			'<ul style="list-style: none;">';
+													   for(var j=0;j<otherQualiArray.length;j++)
+														{
+														   if(otherQualiArray[j]["DegreeName"] != "Any Degree")
+														   {
+															   innerBoiler += '<li style="width:15em;" ><input type="radio" class="rdoOtherQuali_'+graduationArray[i]["studentGraduationId"]+'" name="rdoOtherQuali_'+graduationArray[i]["studentGraduationId"]+'"  value="'+graduationArray[i]["studentGraduationId"]+'-'+otherQualiArray[j]["otherQualificationId"]+'">'+otherQualiArray[j]["DegreeName"]+'</li>';
+														   }
+														}
+						   		innerBoiler +=	'</ul></div></td>'+
+						   				  '</tr>';
+					   }
+					   innerBoiler += '</table>'+
+					   					'</br>'+
+					   					'<center><input type="button" value="Save" class="btn btn-inverse  btnColorGreen " onclick="saveStudOtherQualificationForPlacement()" /></center>';
+					   $('#qualiTD').html(innerBoiler);
+					}
+					else
+					{
+						//window.location.href = "";
+					}
+				}
+				else
+				{
+					//window.location.href = "";
+				}
+			}
+			else
+			{
+				//window.location.href = "";
+			}
+			
+		},
+		error : function() {
+			jAlert("Error in Getting Student Placement List..", "Error");
+		}
+	});
+}
+function registerDialogForPlacement(){
+
+	var customerIdentifiecationObj=$('#customerHelper').val();
+	if(customerIdentifiecationObj=="ICT_MUMBAI" && customerIdentifiecationObj !=undefined){
+	//window.replace("placementRulesForStudent.htm");	
+	window.location.href = "placementRulesForStudent.htm"
+	return false;
+	}
+	jConfirm("Do You Wish to Register For Placments? ", "Confirm", function(result) {
+		if (result == true) {
+			$('#placementAcceptRegistration').modal('show');
+			
+			var boiler1='';
+
+			boiler1 +='<table class="table table-striped table-bordered table-condensed">'+
+			'<tr>'+
+			'<td><u><b>Central Placement Cell Rules</b></u><br><div id="divCPCRulesForStudWhileRegisteringForPlac"></div></td>'+
+			'</tr>';
+			
+			boiler1+='<tr>'+
+						'<td><input type="button" id="btnSave2" value="Accept" class="btn btn-inverse btn-mini   btnColorGreen " onclick="savePlacemenRegistrationAcceptedReq()"/>&nbsp;&nbsp;'+
+						'<input type="button" id="btnSave2" value="Decline" class="btn btn-inverse btn-mini  btnColorRed " onclick="savePlacemenRegistrationRejReq()"/>'+
+						'</td>'+
+					'</tr>';
+
+			boiler1+='</table>';		
+
+			$('#placementAcceptRegistrationBody').html(boiler1);
+			$('#divPlacementRules1').html(boiler1);
+			//divPlacementRules1
+			showCPCRulesInForm();
+		} else{
+			return false;
+			//savePlacemenRegistrationRejReq();
+		}
+	});
+}
+function registerDialogForPlacementOnClick(){
+	jConfirm("Do You Wish to Register For Placments? ", "Confirm", function(result) {
+		if (result == true) {
+	//		$('#placementAcceptRegistration').modal('show');
+			
+			var boiler1='';
+
+			boiler1 +='<table class="table table-striped table-bordered table-condensed">'+
+			'<tr>'+
+			'<td><u><b>Central Placement Cell Rules</b></u><br><div id="divCPCRulesForStudWhileRegisteringForPlac"></div></td>'+
+			'</tr>';
+			
+			boiler1+='<tr>'+
+						'<td><input type="button" id="btnSave2" value="Accept" class="btn btn-inverse btn-mini  btnColorGreen " onclick="savePlacemenRegistrationAcceptedReq()"/>&nbsp;&nbsp;'+
+						'<input type="button" id="btnSave2" value="Decline" class="btn btn-inverse btn-mini  btnColorRed " onclick="savePlacemenRegistrationRejReq()"/>'+
+						'</td>'+
+					'</tr>';
+
+			boiler1+='</table>';		
+
+		//$('#placementAcceptRegistrationBody').html(boiler1);
+			$('#divPlacementRules1').html(boiler1);
+			//divPlacementRules1
+			getPlaceRegReqDetail();
+			showCPCRulesInForm();
+		} else{
+			return false;
+			// savePlacemenRegistrationRejReq();
+		}
+	});
+}
+function saveStudOtherQualificationForPlacement()
+{
+	var studGraduationIdArray = new Array();
+	var otherQualificationId = new Array();
+	$('.graduationIdTrcls').each(function(){
+		
+		var graduationId = $(this).attr('id');
+		studGraduationIdArray.push(graduationId);
+		
+		$('.rdoOtherQuali_'+graduationId).each(function(){
+			if($(this).is(':checked'))
+				otherQualificationId.push($(this).val());
+		});
+	});
+	if(otherQualificationId.length > 0)
+	{
+		$.ajax({
+			url:'saveStudOtherQualificationForPlacement.json?otherQualificationId='+otherQualificationId,
+			dataType:'json',
+			async:false,
+			beforeSend: function() {
+				startCommonAjaxSpinner();
+													
+			},
+			complete: function() {
+				stopCommonAjaxSpinner();
+			},
+			success: function(jArray){
+				jAlert("Saved Successfully");
+				//window.location.href = "MyPlacements.htm?hType=placement";
+			},
+			error: function(){
+				
+			}
+		});
+	}
+	else
+	{
+		jAlert("Please Select Qualification");
+	}
+}

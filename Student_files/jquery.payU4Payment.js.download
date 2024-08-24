@@ -1,0 +1,143 @@
+//eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--){d[e(c)]=k[c]||e(c)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('(n($){$.M.J=n(y){4 5=$.I({C:Q,m:\'0.K\',t:\'G N\',s:\'P O R\',k:r,p:r},y);D v.H(n(){o(5.k){4 3=6.8(\'3\');3.1(\'E\',\'F.L\');3.1(\'11\',\'1a\');o(5.C){4 i=6.8(\'15\');i.1(\'q\',\'b-14\');3.7(i);4 2=6.8(\'b\');2.1(\'g\',\'B\');2.1(\'13\',5.t);2.1(\'f\',5.m);2.1(\'j\',\'a\');2.1(\'h\',\'a\');i.7(2);4 e=6.8(\'17\');e.1(\'q\',\'19-18\');4 z=6.16(\'12.\');e.V=\'\';e.7(z);i.7(e)}S{4 2=6.8(\'b\');2.1(\'g\',\'l\');2.1(\'f\',5.m);2.1(\'j\',\'a\');2.1(\'h\',\'a\');3.7(2)}o(5.p){4 d=6.8(\'b\');d.1(\'g\',\'l\');d.1(\'f\',5.p);d.1(\'j\',\'w\');d.1(\'h\',\'w\');3.7(d)}4 9=6.8(\'b\');9.1(\'g\',\'l\');9.1(\'f\',5.k);9.1(\'j\',\'9\');9.1(\'h\',\'9\');3.7(9);4 c=6.8(\'b\');c.1(\'g\',\'c\');c.1("f",5.s);c.1(\'h\',\'A\');3.7(c);$(v).T(3);$(\'#a\').W({\'B-X\':\'10\'});$(\'#a\').x(\'Z\');$(\'#A\').x(\'u u-Y\')}})}}(U));',62,73,'|setAttribute|AmountTxt|form|var|settings|document|appendChild|createElement|txtTxnCategory|txtTxnAmount|input|submit|AdditionalPaymentDetailsTxt|addonSpan|value|type|id|appendDiv|name|sPC|hidden|sAT|function|if|sAPD|class|null|sBT|sAPH|btn|this|txtTxnAPD|addClass|options|addontext|savebutton|text|bA|return|action|bdpayment|Enter|each|extend|pymt|00|htm|fn|Amount|to|Proceed|false|Payment|else|html|jQuery|innerHTML|css|align|inverse|span1|right|method|Rs|placeholder|append|div|createTextNode|span|on|add|POST'.split('|'),0,{}))
+(function($) {
+
+    $.fn.payU4Pymt = function( options ) {
+        var settings = $.extend({
+            bA  	: false,
+            sAT		: '0.00',
+            sAPH 	: 'Enter Amount',
+            sBT  	: 'Make Payment using PAYU',
+            sPC		: null,
+            iFBIDs	: null,
+            bR		: true,
+         // sAPD	: null
+        }, options);
+
+        return this.each( function() {
+        	
+        	if( settings.sPC ){
+	        	if( settings.iFBIDs ){
+		        	var form = document.createElement('form');
+		        	form.setAttribute('action', 'payU4Payment.json');
+		        	form.setAttribute('method', 'POST');
+		        	form.setAttribute('id', 'payU4PaymentForm');
+		        	
+		        	if( settings.bA ){
+		        		var appendDiv = document.createElement('div');
+		        		appendDiv.setAttribute('class','input-append');
+		        		form.appendChild(appendDiv);
+		        		
+		        		var AmountTxt = document.createElement('input');
+		        		AmountTxt.setAttribute('type', 'text');
+		        		AmountTxt.setAttribute('placeholder', settings.sAPH);
+		        		AmountTxt.setAttribute('value', settings.sAT);
+		        		AmountTxt.setAttribute('name', 'txtTxnAmount');
+		        		AmountTxt.setAttribute('id', 'txtTxnAmount');
+		        		appendDiv.appendChild(AmountTxt);
+		        		
+		        		var addonSpan = document.createElement('span');
+		        		addonSpan.setAttribute('class','add-on');
+		        		var addontext = document.createTextNode('Rs.');
+		        		addonSpan.innerHTML = '';
+		        		addonSpan.appendChild(addontext);
+		        		appendDiv.appendChild(addonSpan);
+		        	}/*else{
+		        		var AmountTxt = document.createElement('input');
+		        		AmountTxt.setAttribute('type', 'hidden');
+		        		AmountTxt.setAttribute('value', settings.sAT);
+		        		AmountTxt.setAttribute('name', 'txtTxnAmount');
+		        		AmountTxt.setAttribute('id', 'txtTxnAmount');
+		        		form.appendChild(AmountTxt);
+		        	}*/
+		        	
+		        	/*if( settings.sAPD ){
+		        		var AdditionalPaymentDetailsTxt = document.createElement('input');
+		        		AdditionalPaymentDetailsTxt.setAttribute('type', 'hidden');
+		        		AdditionalPaymentDetailsTxt.setAttribute('value', settings.sAPD);
+		        		AdditionalPaymentDetailsTxt.setAttribute('name', 'txtTxnAPD');
+		        		AdditionalPaymentDetailsTxt.setAttribute('id', 'txtTxnAPD');
+		        		form.appendChild(AdditionalPaymentDetailsTxt);
+		        	}*/
+		        	
+		        	var txtTxnCategory = document.createElement('input');
+		        	txtTxnCategory.setAttribute('type', 'hidden');
+		        	txtTxnCategory.setAttribute('value',settings.sPC);
+		        	txtTxnCategory.setAttribute('name', 'txtTxnCategory');
+		        	txtTxnCategory.setAttribute('id', 'txtTxnCategory');
+		        	form.appendChild(txtTxnCategory);
+		        	
+		        	if( settings.iFBIDs ){
+			        	var txtBankId = document.createElement('input');
+			        	txtBankId.setAttribute('type', 'hidden');
+			        	txtBankId.setAttribute('value',settings.iFBIDs);
+			        	txtBankId.setAttribute('name', 'txtBankIds');
+			        	txtBankId.setAttribute('id', 'txtBankIds');
+			        	form.appendChild(txtBankId);
+	        		}
+		        	
+		        	var submit = document.createElement('input');
+		        	
+		        	submit.setAttribute('type', 'submit');
+		        	submit.setAttribute("value", settings.sBT);
+		        	submit.setAttribute('id', 'savebutton');
+		        	
+		        	form.appendChild(submit);
+		        	
+		        	var errorSection = document.createElement('div');
+		        	errorSection.setAttribute('style', 'margin-left:10px;');
+		        	errorSection.setAttribute('id', 'paymentErrorMessageSection');
+		        	errorSection.innerHTML = '';
+
+                    form.appendChild(errorSection);
+		        	
+//		        	var note = document.createElement('div');
+//                    note.setAttribute('style', 'margin-left:10px;');
+//                    note.innerHTML = '<br/><ul>'
+//                                    + '<li>You have clicked on a link which leaves JUNO Application, and you will be redirected to a third party website. JUNO makes no representations nor has any supervision or control over the quality, content, reliability or security of the third party website, nor shall be liable for its use.</li>'
+//                                    + '<li>After successful completion of the payment, the system will be directed back to the JUNO. Generate receipt of the payment made and produce the same as and when required.</li>'
+//                                    + '<li>JUNO does not charge any processing fee or service charges from the students for online payment. However, the students have to pay the charges as applicable for the merchant banks.</li>'
+//                                    + '</ul>';
+//
+//                    form.appendChild(note);
+		        	
+		        	
+		        	$(this).html(form);
+		        	$('#txtTxnAmount').css({'text-align':'right'});
+		        	$('#txtTxnAmount').addClass('span1');
+		        	$('#savebutton').addClass('btn btn-inverse');
+		        	
+		        	if (settings.bR){
+		        		$.ajax({
+		        			url:'checkPendingPayments.json?sTC='+settings.sPC,
+		        			dataType:'json',
+		        			type:'POST',
+		        			beforeSend: function() {
+		        				$('#savebutton').attr('disabled',true);
+		        			},
+		        			success:function(jArray){
+		        				/*if(jArray["existingPayment"]){
+		        					$('#savebutton').attr('disabled',true);
+		        					$('#payUPaymentForm').attr('action', '');
+		        					$('#paymentErrorMessageSection').html("<b colspan='2' style='font-style:italic; text-align:center; color:#cf0d0d;' >" +
+		        							" It seems that you made an attempt for payment." +
+		        							" In case you have already made the payment and the amount has been deducted from your account, " +
+		        							" please wait for 20 mins before trying again." +
+		        							" Please contact office, if you are still not getting the payment button</b>")
+		        				}else{*/
+		        					$('#savebutton').attr('disabled',false);
+		        					$('#payUPaymentForm').attr('action', 'payU4Payment.json');
+		        					$('#paymentErrorMessageSection').html('')
+		        				/*}*/
+		        				
+		        				
+		        			},
+		        			error:function(){
+		        				
+		        			}
+		        		});
+		        	}
+        		}
+        	}
+       });
+    };
+}(jQuery));

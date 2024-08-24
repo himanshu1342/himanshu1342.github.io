@@ -1,0 +1,31 @@
+(function($) {
+    $.fn.loadHelp = function( options ) {
+        var settings = $.extend({
+            docPath	: '',
+            key		: ''
+        }, options);
+
+        return this.each( function() {
+        	var f = document.createElement('form');
+        	f.setAttribute('action', settings.docPath);
+        	f.setAttribute('method', 'POST');
+        	f.setAttribute('target', 'iframe');
+        	
+    		var k = document.createElement('input');
+    		k.setAttribute('type', 'hidden');
+    		k.setAttribute('value', settings.key);
+    		k.setAttribute('name', 'k');
+    		k.setAttribute('id', 'k');
+        	f.appendChild(k);
+        	
+        	var i = document.createElement('iframe');
+        	i.setAttribute('name', 'iframe');
+        	i.setAttribute('height', '100%');
+        	i.setAttribute('width', '100%');
+
+        	$(this).html(f);
+        	$(this).append(i);
+        	f.submit();
+       });
+    };
+}(jQuery));

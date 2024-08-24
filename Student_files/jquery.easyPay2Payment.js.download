@@ -1,0 +1,111 @@
+(function($) {
+    $.fn.easyPay2Pymt = function( options ) {
+        var settings = $.extend({
+            bA  	: false,
+            sAT		: '0.00',
+            sAPH 	: 'Enter Amount',
+            sBT  	: 'Payment Gateway',
+            sPC		: null,
+            iFBIDs	: 4,
+            bR		: true,
+        }, options);
+        return this.each( function() {
+        	if( settings.sPC ){
+	        	if( settings.iFBIDs ){
+		        	var form = document.createElement('form');
+		        	form.setAttribute('action', 'easyPay2Payment.json');
+		        	form.setAttribute('method', 'POST');
+		        	form.setAttribute('id', 'easyPayPaymentForm4');
+		        			        	
+		        	if( settings.sAPD ){
+		        		var AdditionalPaymentDetailsTxt = document.createElement('input');
+		        		AdditionalPaymentDetailsTxt.setAttribute('type', 'hidden');
+		        		AdditionalPaymentDetailsTxt.setAttribute('value', settings.sAPD);
+		        		AdditionalPaymentDetailsTxt.setAttribute('name', 'txtTxnAPD');
+		        		AdditionalPaymentDetailsTxt.setAttribute('id', 'txtTxnAPD4');
+		        		form.appendChild(AdditionalPaymentDetailsTxt);
+		        	}
+		        	
+		        	var txtTxnCategory = document.createElement('input');
+		        	txtTxnCategory.setAttribute('type', 'hidden');
+		        	txtTxnCategory.setAttribute('value',settings.sPC);
+		        	txtTxnCategory.setAttribute('name', 'txtTxnCategory');
+		        	txtTxnCategory.setAttribute('id', 'txtTxnCategory4');
+		        	form.appendChild(txtTxnCategory);
+		        	
+		        	if( settings.iFBIDs ){
+			        	var txtBankId = document.createElement('input');
+			        	txtBankId.setAttribute('type', 'hidden');
+			        	txtBankId.setAttribute('value',settings.iFBIDs);
+			        	txtBankId.setAttribute('name', 'txtBankIds');
+			        	txtBankId.setAttribute('id', 'txtBankIds4');
+			        	form.appendChild(txtBankId);
+	        		}
+	        		
+		        	var logo = document.createElement('img');
+		        	logo.setAttribute('src', 'img/AXIS.png');
+		        	logo.setAttribute('height', '30px');
+		        	form.appendChild(logo);
+		        	
+		        	var br = document.createElement('br');
+		        	form.appendChild(br);
+		        	
+		        	var submit = document.createElement('input');
+		        	submit.setAttribute('type', 'submit');
+		        	submit.setAttribute("value", settings.sBT);
+		        	submit.setAttribute('id', 'savebutton4');
+		        	
+		        	form.appendChild(submit);
+		        	
+		        	var note = document.createElement('div');
+                    note.setAttribute('style', 'margin-left:10px;');
+                    note.innerHTML = '<strong>All Banks Internet Banking Supported</strong>';
+
+                    form.appendChild(note);
+		        	
+		        	var errorSection = document.createElement('div');
+		        	errorSection.setAttribute('style', 'margin-left:10px;');
+		        	errorSection.setAttribute('id', 'paymentErrorMessageSection4');
+		        	errorSection.innerHTML = '';
+
+                    form.appendChild(errorSection);
+
+		        	$(this).html(form);
+		        	$('#txtTxnAmount4').css({'text-align':'right'});
+		        	$('#txtTxnAmount4').addClass('span1');
+		        	$('#savebutton4').addClass('btn btn-inverse');
+		        	
+		        	if (settings.bR){
+		        		$.ajax({
+		        			url:'checkPendingPayments.json?sTC='+settings.sPC,
+		        			dataType:'json',
+		        			type:'POST',
+		        			beforeSend: function() {
+		        				//$('#savebutton4').attr('disabled',true);
+		        			},
+		        			success:function(jArray){
+		        				if(jArray["existingPayment"]){
+		        					//$('#savebutton4').attr('disabled',true);
+		        					//$('#easyPayPaymentForm4').attr('action', '');
+		        					$('#paymentErrorMessageSection4').html("<b colspan='2' style='font-style:italic; text-align:center; color:#cf0d0d;' >" +
+		        							" It seems that you made an attempt for payment." +
+		        							" In case you have already made the payment and the amount has been deducted from your account, " +
+		        							" please wait for 24 hours before trying again." +
+		        							" Please contact office, if you are still not getting the payment button</b>")
+		        				}else{
+		        					$('#savebutton4').attr('disabled',false);
+		        					$('#easyPayPaymentForm4').attr('action', 'easyPay2Payment.json');
+		        					$('#paymentErrorMessageSection4').html('');
+		        				}
+		        			},
+		        			error:function(){
+		        				
+		        			}
+		        		});
+		        	}
+		        	
+        		}
+        	}
+       });
+    };
+}(jQuery));

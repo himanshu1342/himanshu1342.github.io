@@ -1,0 +1,98 @@
+(function($) {
+    $.fn.easyPay8Pymt = function( options ) {
+        var settings = $.extend({
+            bA  	: false,
+            sAT		: '0.00',
+            sAPH 	: 'Enter Amount',
+            sBT  	: 'Make Payment using ICICI',
+            sPC		: null,
+            iFBIDs	: 29,
+            bR		: false,
+        }, options);
+        return this.each( function() {
+        	if( settings.sPC ){
+	        	if( settings.iFBIDs ){
+		        	var form = document.createElement('form');
+		        	form.setAttribute('action', 'easyPay8Payment.json');
+		        	form.setAttribute('method', 'POST');
+		        	form.setAttribute('id', 'easyPayPaymentForm8');
+		        			        	
+		        	if( settings.sAPD ){
+		        		var AdditionalPaymentDetailsTxt = document.createElement('input');
+		        		AdditionalPaymentDetailsTxt.setAttribute('type', 'hidden');
+		        		AdditionalPaymentDetailsTxt.setAttribute('value', settings.sAPD);
+		        		AdditionalPaymentDetailsTxt.setAttribute('name', 'txtTxnAPD');
+		        		AdditionalPaymentDetailsTxt.setAttribute('id', 'txtTxnAPD8');
+		        		form.appendChild(AdditionalPaymentDetailsTxt);
+		        	}
+		        	
+		        	var txtTxnCategory = document.createElement('input');
+		        	txtTxnCategory.setAttribute('type', 'hidden');
+		        	txtTxnCategory.setAttribute('value',settings.sPC);
+		        	txtTxnCategory.setAttribute('name', 'txtTxnCategory');
+		        	txtTxnCategory.setAttribute('id', 'txtTxnCategory8');
+		        	form.appendChild(txtTxnCategory);
+		        	
+		        	if( settings.iFBIDs ){
+			        	var txtBankId = document.createElement('input');
+			        	txtBankId.setAttribute('type', 'hidden');
+			        	txtBankId.setAttribute('value',settings.iFBIDs);
+			        	txtBankId.setAttribute('name', 'txtBankIds');
+			        	txtBankId.setAttribute('id', 'txtBankIds8');
+			        	form.appendChild(txtBankId);
+	        		}
+	        		
+					var submit = document.createElement('input');
+		        	submit.setAttribute('type', 'submit');
+		        	submit.setAttribute("value", settings.sBT);
+		        	submit.setAttribute('id', 'savebutton8');
+		        	
+		        	form.appendChild(submit);
+
+
+		        	var errorSection = document.createElement('div');
+		        	errorSection.setAttribute('style', 'margin-left:10px;');
+		        	errorSection.setAttribute('id', 'paymentErrorMessageSection8');
+		        	errorSection.innerHTML = '';
+
+                    form.appendChild(errorSection);
+
+		        	$(this).html(form);
+		        	$('#txtTxnAmount8').css({'text-align':'right'});
+		        	$('#txtTxnAmount8').addClass('span1');
+		        	$('#savebutton8').addClass('btn btn-inverse');
+		        	
+		        	if (settings.bR){
+		        		$.ajax({
+		        			url:'checkPendingPayments.json?sTC='+settings.sPC,
+		        			dataType:'json',
+		        			type:'POST',
+		        			beforeSend: function() {
+		        				//$('#savebutton8').attr('disabled',true);
+		        			},
+		        			success:function(jArray){
+		        				if(jArray["existingPayment"]){
+		        					//$('#savebutton8').attr('disabled',true);
+		        					//$('#easyPayPaymentForm8').attr('action', '');
+		        					$('#paymentErrorMessageSection8').html("<b colspan='2' style='font-style:italic; text-align:center; color:#cf0d0d;' >" +
+		        							" It seems that you made an attempt for payment." +
+		        							" In case you have already made the payment and the amount has been deducted from your account, " +
+		        							" please wait for 24 hours before trying again." +
+		        							" Please contact office, if you are still not getting the payment button</b>")
+		        				}else{
+		        					$('#savebutton8').attr('disabled',false);
+		        					$('#easyPayPaymentForm8').attr('action', 'easyPay8Payment.json');
+		        					$('#paymentErrorMessageSection8').html('');
+		        				}
+		        			},
+		        			error:function(){
+		        				
+		        			}
+		        		});
+		        	}
+		        	
+        		}
+        	}
+       });
+    };
+}(jQuery));

@@ -1,0 +1,13 @@
+(function($) {
+    $.fn.protector = function() {
+        return this.each( function() {
+	    	$(this).bind('contextmenu', function(e) {
+				   return false;
+	    	});  
+        	$(this).css('MozUserSelect','none');	
+     	   	$(this).bind('selectstart',function(){return false;});
+ 	   		$(this).mousedown(function(){return false;});
+	        $(this).html();
+       });
+    };
+}(jQuery));

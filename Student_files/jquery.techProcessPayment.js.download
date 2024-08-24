@@ -1,0 +1,70 @@
+(function($) {
+
+    $.fn.techProcessPymt = function( options ) {
+        var settings = $.extend({
+            bA  	: false,
+            sAT		: '0.00',
+            sAPH 	: 'Enter Amount',
+            sBT  	: 'Make Payment',
+            sPC		: null,
+            iFBIDs	: null,
+        }, options);
+
+        return this.each( function() {
+        	if( settings.sPC ){
+	        	var form = document.createElement('form');
+	        	form.setAttribute('action', 'payU5Payment.json');
+	        	form.setAttribute('method', 'POST');
+	        	
+	        	if( settings.bA ){
+	        		var appendDiv = document.createElement('div');
+	        		appendDiv.setAttribute('class','input-append');
+	        		form.appendChild(appendDiv);
+	        		
+	        		var AmountTxt = document.createElement('input');
+	        		AmountTxt.setAttribute('type', 'text');
+	        		AmountTxt.setAttribute('placeholder', settings.sAPH);
+	        		AmountTxt.setAttribute('value', settings.sAT);
+	        		AmountTxt.setAttribute('name', 'txtTxnAmount');
+	        		AmountTxt.setAttribute('id', 'txtTxnAmount');
+	        		appendDiv.appendChild(AmountTxt);
+	        		
+	        		var addonSpan = document.createElement('span');
+	        		addonSpan.setAttribute('class','add-on');
+	        		var addontext = document.createTextNode('Rs.');
+	        		addonSpan.innerHTML = '';
+	        		addonSpan.appendChild(addontext);
+	        		appendDiv.appendChild(addonSpan);
+	        	}
+	        	
+	        	var txtTxnCategory = document.createElement('input');
+	        	txtTxnCategory.setAttribute('type', 'hidden');
+	        	txtTxnCategory.setAttribute('value',settings.sPC);
+	        	txtTxnCategory.setAttribute('name', 'txtTxnCategory');
+	        	txtTxnCategory.setAttribute('id', 'txtTxnCategory');
+	        	form.appendChild(txtTxnCategory);
+	        	
+	        	if( settings.iFBIDs ){
+		        	var txtBankId = document.createElement('input');
+		        	txtBankId.setAttribute('type', 'hidden');
+		        	txtBankId.setAttribute('value',settings.iFBIDs);
+		        	txtBankId.setAttribute('name', 'txtBankIds');
+		        	txtBankId.setAttribute('id', 'txtBankIds');
+		        	form.appendChild(txtBankId);
+        		}
+	        	
+	        	var submit = document.createElement('input');
+	        	
+	        	submit.setAttribute('type', 'submit');
+	        	submit.setAttribute("value", settings.sBT);
+	        	submit.setAttribute('id', 'savebutton');
+	        	
+	        	form.appendChild(submit);
+	        	$(this).html(form);
+	        	$('#txtTxnAmount').css({'text-align':'right'});
+	        	$('#txtTxnAmount').addClass('span1');
+	        	$('#savebutton').addClass('btn btn-inverse');
+        	}
+       });
+    };
+}(jQuery));

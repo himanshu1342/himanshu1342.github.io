@@ -1,0 +1,623 @@
+
+/*
+ * author:Kiran Badave & Ankita Kusalkar
+ * Info: Previous auto selection
+ * Ticket No: #812380
+ * */
+/*$(document).ready(function(){
+	junoAutoSelection.autoPreviousSelections('getOnLoad');
+});*/
+var junoAutoSelection = {
+		openMenu:()=>{
+			setTimeout(()=>{
+				$('#menuMaster-DropDown').addClass('open');
+			},500);
+		}
+};
+junoAutoSelection.gPreSelectionArrayList=null;
+junoAutoSelection.validationArr = [null,'0','-','Select','undifined',''];
+junoAutoSelection.autoPreviousSelectionsChangeEventBindFlag= false;
+junoAutoSelection.escapeHtml = function(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+};
+
+/*$(document).ready(function() {
+	junoAutoSelection.autoPreviousSelections('get');
+});*/
+
+junoAutoSelection.comboSelectedArray = function(){ //cmbArr, lastSelCombId
+	var arr = new Array();
+	var lastSelCombId = null;
+	$('select').each(function(){
+		if(!junoAutoSelection.validationArr.includes($(this).val())){
+			if((($(this).is(':visible') && ($(this).prop('id')!="")) ||  ($(this).hasClass('chzn-done') && $('#'+$(this).prop('id')+'_chzn').is(':visible'))) && arr.length<6){
+				arr.push({
+					id:$(this).prop('id'),
+					val:$(this).val()
+				});
+				lastSelCombId = $(this).prop('id');
+			}	
+		}else{
+			if((($(this).is(':visible') && ($(this).prop('id')!="")) ||  ($(this).hasClass('chzn-done') && $('#'+$(this).prop('id')+'_chzn').is(':visible'))) && arr.length<6){
+				lastSelCombId = $(this).prop('id');
+			}
+		}
+	});
+	
+	return {cmbArr:arr, lastSelCombId: lastSelCombId};
+};
+
+
+junoAutoSelection.autoPreviousSelections = function(flg){
+	try{
+		var flag="set";
+		var parameters ="";
+		var validationArr = [null,'0','-','Select','undifined',''];
+		if(flg!=undefined && ['get','set', 'getOnLoad'].includes(flg)){//|| $('#chkPreSelectionKirn').is(':checked')==true
+			var arr = junoAutoSelection.comboSelectedArray().cmbArr;		
+			var lastSelCombId = junoAutoSelection.comboSelectedArray().lastSelCombId;
+			if(flg!=undefined && (flg=='get' || flg=='getOnLoad')){
+				flag = 'get';
+				if(lastSelCombId==null){
+					return;
+				}
+			}else{
+				//junoAutoSelection.AutoPreviousSelectionsChangeEventBind(lastSelCombId);
+				parameters = JSON.stringify(arr);
+				flag="set";
+			}
+		}else{
+			flag="delete";
+		}
+		$.ajax({
+			url:'getSetAndDeleteAutoPreviousSelection.json',
+			data:{
+				parameters:parameters.toString(),
+				linkURL: location.pathname,
+				flag:flag
+			},
+			type:'POST',
+			dataType:'json',
+			asyc:true,
+			success:function(jArray){
+				if(flg!=undefined && flg == 'getOnLoad'){
+					if(jArray.length>0){
+						$('body').eq(0).append(`<div class="restoreSelectionBtnCommonCls restoreSelectionBtnCss" style="position:absolute;top:150px;right:-300px;" onclick="breadcrumbSideMenuOptions(7);">
+									<i class="fa fa-retweet"></i> Restore Selections
+								</div>`);
+						//<i class="fa fa-info-circle" title="Auto Previous Selection" onclick="junoAutoSelection.openMenu()"></i>
+						setTimeout(()=>{
+							$(".restoreSelectionBtnCommonCls").animate({right: '0px'}, function(){
+								var tmpThis = this;
+								setTimeout(()=>{
+								    $(tmpThis).animate({right: '-300px'},function(){$(this).remove();});  
+								}, 15000);
+							});
+						},1000);
+					}
+				}else if(flag=='get'){
+					if(jArray.length>0){
+						/*setTimeout(function(){
+							$('#chkPreSelectionKirn').prop('checked',true);	
+						},3500);*/
+						junoAutoSelection.gPreSelectionArrayList=jArray;
+						junoAutoSelection.autoPreviousSelectCmb();
+					}else{
+						jAlert("No previous selection available! Save your current selection to remember.")
+					}
+				}
+			},
+			error:function(){
+				//getCustomAlertMessage("alert_error");
+			}
+		}); 
+	}catch(e){}
+}
+
+
+junoAutoSelection.AutoPreviousSelectionsChangeEventBind = function(lastSelectCombId){
+	var arr=0;
+	if(junoAutoSelection.autoPreviousSelectionsChangeEventBindFlag!=true && lastSelectCombId!=undefined){
+		var lastSelectDom = $('#'+lastSelectCombId);
+		/*$('select').each(function(){
+			if(($(this).is(':visible') || $(this).hasClass('chzn-done')) && arr<6){
+				arr++;
+				lastSelectDom = $(this);
+			}	
+		});*/
+		if(lastSelectDom!=undefined){
+			$(lastSelectDom).off('autoSelect:on').on("autoSelect:on", function(){
+				if($('#chkPreSelectionKirn').is(':checked')){
+					junoAutoSelection.gPreSelectionArrayList=null;
+					junoAutoSelection.autoPreviousSelections();
+				}
+			});
+			$(lastSelectDom).change(function(){
+				$(this).trigger('autoSelect:on');
+			});
+		}
+		junoAutoSelection.autoPreviousSelectionsChangeEventBindFlag= true;
+	}
+	
+}
+
+var newArrayAutoPreviousSelectCmbflag = Array();
+
+junoAutoSelection.autoPreviousSelectCmbInterval = null;
+junoAutoSelection.autoPreviousSelectCmb = function(){
+	
+	if(junoAutoSelection.gPreSelectionArrayList!=null){
+		setTimeout(function(){
+			junoAutoSelection.autoPreviousSelectCmbInterval = setInterval(function() {
+				var comboSelectDoneCount = 0;
+				for(var i in junoAutoSelection.gPreSelectionArrayList){
+					var srcTmp = $('#'+junoAutoSelection.gPreSelectionArrayList[i].id);
+					if(srcTmp!=undefined){
+						if(srcTmp.val() != junoAutoSelection.gPreSelectionArrayList[i].val){
+							srcTmp.val(junoAutoSelection.gPreSelectionArrayList[i].val);
+							if($(srcTmp).hasClass('chzn-done')){
+								$(srcTmp).trigger("liszt:updated");	
+							}
+							if(!junoAutoSelection.validationArr.includes($(srcTmp).val())){
+								if(($('#'+$($(srcTmp)).prop('id')+' option').length >1 && !$(srcTmp).hasClass('chzn-done'))  || ($('#'+$($(srcTmp).prop('id')+' option').length > 2))){
+									$(srcTmp).trigger('change');
+								}
+							}
+							var cccccnt = junoAutoSelection.gPreSelectionArrayList[i].checkCount;
+							junoAutoSelection.gPreSelectionArrayList[i].checkCount = cccccnt!=undefined?cccccnt+1:1; 
+							if(junoAutoSelection.gPreSelectionArrayList[i].checkCount>5){
+								console.log("Infinte Call - Terminate Interval - Stop Auto Select")
+								clearInterval(junoAutoSelection.autoPreviousSelectCmbInterval);
+							}
+							//console.log("interval ---- "+junoAutoSelection.gPreSelectionArrayList[i].id+" count: -- "+junoAutoSelection.gPreSelectionArrayList[i].checkCount);
+						}else{
+							junoAutoSelection.gPreSelectionArrayList[i].done = true;
+							comboSelectDoneCount++;
+						}
+					}
+					
+				}
+				//console.log("lastCount --- "+gPreSelectionArrayList.length+"=="+comboSelectDoneCount);
+				if(junoAutoSelection.gPreSelectionArrayList.length==comboSelectDoneCount){
+					console.log("Interval Finish");
+					clearInterval(junoAutoSelection.autoPreviousSelectCmbInterval);
+					//junoAutoSelection.AutoPreviousSelectionsChangeEventBind(junoAutoSelection.gPreSelectionArrayList[junoAutoSelection.gPreSelectionArrayList.length-1].id);		
+				}
+			}, 1500);
+			
+			setTimeout(function(){
+				clearInterval(junoAutoSelection.autoPreviousSelectCmbInterval);
+			},20000);
+		},200);
+	}
+}
+
+
+
+
+function breadcrumbSideMenuOptions(flg){
+	if(flg==2){
+		$.ajax({
+			url:'getEmployeeForDutyAllocationByLevelNo.json?linkurl='+ window.location.toString().split('_')[1],
+			dataType:'json',
+			async:false,
+			beforeSend:function() {
+				startCommonAjaxSpinner();
+			},
+			complete: function() {
+				stopCommonAjaxSpinner();
+			},
+			success:function(jArray)
+			{
+				var boiler = '<fieldset class="custom-fieldset"><legend><i class="fa fa-share"></i> Share with</legend><input type="text" id="sharePageWithEmployeeTo" />'+
+				'<br/>'+
+				'<span onclick="junoAutoSelection.sharePageWithUser()" class="btn btn-info btn-mini"><i class="fa fa-share"></i> <b>Share Page</b></span>'+
+				'</fieldset>';
+				
+				$('#gemsCommonDialogModal .modal-header h3').text("Share Page Link");
+				$('#gemsCommonDialogModal .modal-body').html(boiler);
+				$('#gemsCommonDialogModal').modal('show');
+
+				$('#sharePageWithEmployeeTo').tokenInput(jArray,{
+					theme: "facebook",
+					resultsLimit: 10,
+					tokenLimit:5,
+					placeholder: 'Select Employee',
+					propertyToSearch: "name",
+					preventDuplicates: true,
+					resultsFormatter: function(item){ return "<li><img src='" + item.imageUrl + "' title='" + item.name + "' style='height:25px; width:25px;' />" +
+						"<div style='display: inline-block; padding-left: 10px;'><div class='full_name'>" + item.name +
+						"</div><div class='email'>" + item.desc + "</div></div></li>";
+					},
+					tokenFormatter: function(item) { return "<li><p><img src='"+item.imageUrl+"' title='"+item.name+"' style='height:25px; width:25px;'/>"
+						+item.name+"</p></li>";}
+
+				});
+				
+			},
+			error:function(){
+				getCustomAlertMessage("alert_error");
+			}
+		});
+	}
+
+	if(flg=='pageInfo'){
+		var ticketBoiler = `<textarea style="width: 100%; height: 200px;font-size: var(--juno-font-size-heading);border: #fff;" id="genrateTicketTxtArea">
+Name : ${juno.login_userFullName}
+Email : ${juno.login_emailId}
+Client : ${juno.customerHelper}
+Role : ${juno.currentRoleName}
+Breadcrumb : ${$('<div>'+firstTimebreadCrumbs+'</div>').text()}
+</textarea><button class="btn btn-inverse btn-mini" id="copyTicketTxtArea">Copy</button>`;
+
+		juno.modal({
+			header:'<i class="fa fa-exclamation-circle"></i> Page Info',
+			body: ticketBoiler
+		});
+	}
+	if(flg==3){
+		var ticketBoiler = '<textarea style="width: 100%; height: 200px;font-size: var(--juno-font-size-heading);border: #fff;" id="genrateTicketTxtArea">Ticket No :  \n'+
+		'Client : '+(juno.customerHelper)+' \n'+
+		'Role : '+(juno.currentRoleName)+' \n'+
+		'Breadcrumb : '+$('<div>'+firstTimebreadCrumbs+'</div>').text()+' \n'+
+		'Change requested by : \n'+
+		'Changes About : Requirement/Bug \n'+
+		'DESC : </textarea><button class="btn btn-inverse btn-mini" id="copyTicketTxtArea">Copy</button>';
+
+		juno.modal({
+			header:'<i class="fa fa-bookmark-o"></i> Ticket',
+			body: ticketBoiler
+		});		
+	}
+
+	if(flg==4){
+
+		if(juno!=undefined && juno.label!=undefined){
+			/* Ticket - #618369 -Kiran Badave */
+			var labelsBoiler = '<div class="alert alert-info"><b>Note: Add common Labels in Label.properties if not exist.</b>'
+				+'<br/> <b>Examples: For common - </b>'+junoAutoSelection.escapeHtml(juno.label["a.download.json"])+','
+				+'<br/> <b>JS code -</b> juno.label[\"a.download.json\"].setIndexedArgs(\'1001\', \'TEXT\', \'myDocument.docx\',\'Download\') '
+				+'<br/> <b>JAVA code -</b> MessageFormat.format(ApplicationProperty.getGeneralisedProperty(\"a.download.json\"),\"1001\", \"TEXT\", \"myDocument.docx\", \"Download\"); '
+				+'<br/> <b>Outout -</b> &lt;a href="documentDownload.json?id=1001&amp;type=TEXT&amp;name=myDocument.docx" target="_blank"&gt; Download &lt;/a&gt;'
+				+'</div><table class="table table-bordered table-condenced" id="junoLblTbl" style="font-size: 12px;"><thead><tr><th>Label</th><th>JSP</th><th>JS</th></tr></thead><tbody>';
+
+			for(var contx in juno.label){
+				labelsBoiler+= '<tr><td>'+(junoAutoSelection.escapeHtml(juno.label[contx]))+'</td><td>&lt;fmt:message key=&quot;'+contx+'&quot;/&gt;</td><td>juno.label[&quot;'+contx+'&quot;]</td></tr>';
+			}
+			labelsBoiler+='</tbody></table>';
+
+			$('#gemsCommonDialogModal .modal-header h3').text("Labels from Label.properties");
+			$('#gemsCommonDialogModal .modal-body').html(labelsBoiler);
+			$('#gemsCommonDialogModal').modal('show');
+			gemsCommonPopupModalCssLayout('#gemsCommonDialogModal', 900);
+			$('#junoLblTbl').dataTable({
+				"sDom": "<'row'<'margin-left-22'l><'pull-right'f>r>t<'row'<'margin-left-22'i><'pull-right'p>>",
+				"iDisplayLength":-1,
+				"bLengthChange" : false,
+				"bPaginate" : false,
+			});
+		}
+
+	}
+
+	if(flg==5){
+		/*setTimeout(function(){$('#menuMaster-DropDown').addClass('open');},3);
+		setTimeout(function(){
+			var chkOb = $('#chkPreSelectionKirn');
+			chkOb.prop('checked',chkOb.is(':checked')==true?false:true);
+			if(chkOb.is('checked')==false){*/
+				junoAutoSelection.autoPreviousSelections('set');
+			/*}
+		},20);*/		
+	}
+	if(flg==7){
+		$('.restoreSelectionBtnCommonCls').animate({right: '-300px'},function(){$(this).remove();});
+		junoAutoSelection.autoPreviousSelections('get');
+	}
+	
+	if(flg==6){
+		$('#gemsCommonDialogModal .modal-header h3').html('<i class="fa fa-medkit fa-lg"></i> Support');
+		$('#gemsCommonDialogModal .modal-body').html('<iframe style="width:100%;height:400px;" src="mySupport.htm?hflg=true&breadcrumb='+encodeURIComponent(firstTimebreadCrumbs)+'"/>');
+		$('#gemsCommonDialogModal').modal('show');
+		gemsCommonPopupModalCssLayout('#gemsCommonDialogModal', 1100);
+	}
+	$('#copyTicketTxtArea').off('click').click(function(){
+		var copyText = document.getElementById("genrateTicketTxtArea");
+		copyText.select();
+		document.execCommand("copy");
+		$(this).text("Copied!").removeClass('btn-inverse').addClass("btn-success");
+		setTimeout(function(){$('#copyTicketTxtArea').text("Copy").removeClass('btn-success').addClass("btn-inverse");},2000);
+	});
+}
+
+junoAutoSelection.sharePageWithUser = function(){
+
+	var parameters = JSON.stringify(arr);
+	var shareWithEmpIds = $.trim($('#sharePageWithEmployeeTo').val());
+	if(shareWithEmpIds==''){
+		jAlert('Please select Employee!')
+		return;
+	}
+	
+	$.ajax({
+		url:'sharePageWithUserWithAutoSelection.json',
+		data:{
+			parameters:parameters.toString(),
+			linkURL: location.pathname,
+			shareWithEmpIds:shareWithEmpIds
+		},
+		type:'POST',
+		dataType:'json',
+		asyc:true,
+		success:function(jArray){
+			
+		},
+		error:function(){
+			getCustomAlertMessage("alert_error");
+		}
+	}); 
+}
+
+
+junoAutoSelection.fallbackCopyTextToClipboard = function(text) {
+	var textArea = document.createElement("textarea");
+	textArea.value = text;
+
+	// Avoid scrolling to bottom
+	textArea.style.top = "0";
+	textArea.style.left = "0";
+	textArea.style.position = "fixed";
+
+	document.body.appendChild(textArea);
+	textArea.focus();
+	textArea.select();
+
+	try {
+		var successful = document.execCommand('copy');
+		var msg = successful ? 'successful' : 'unsuccessful';
+		console.log('Fallback: Copying text command was ' + msg);
+	} catch (err) {
+		console.error('Fallback: Oops, unable to copy', err);
+	}
+	document.body.removeChild(textArea);
+}
+junoAutoSelection.copyTextToClipboard = function(text) {
+	if (!navigator.clipboard) {
+		junoAutoSelection.fallbackCopyTextToClipboard(text);
+		return;
+	}
+	navigator.clipboard.writeText(text).then(function() {
+		console.log('Async: Copying to clipboard was successful!');
+	}, function(err) {
+		console.error('Async: Could not copy text: ', err);
+	});
+}
+
+/*function DeleteThis_autoPreviousSelectCmb(src){
+
+	if(src!=undefined && gPreSelectionArrayList!=null ){
+		setTimeout(function(){
+			if(src!=undefined && gPreSelectionArrayList!=null ){
+				var autoPreviousSelectCmbflag=false;
+				var count=0;
+				for(var i=0; i<gPreSelectionArrayList.length;i++){
+					if((gPreSelectionArrayList[i]["id"]==$(src).prop('id')) && !newArrayAutoPreviousSelectCmbflag.includes($(src).prop('id'))){
+						var setValueInAutoPreviousSelectCmb = false;
+						$(src).val(gPreSelectionArrayList[i]["val"]);
+						//	console.log(i+' : '+$(src).prop('id')+' -- '+gPreSelectionArrayList[i]["val"]);
+						if($(src).hasClass('chzn-done')){
+							$(src).trigger("liszt:updated");	
+						}
+						if(!validationArr.includes($(src).val())){
+							if(($('#'+$($(src)).prop('id')+' option').length >1 && !$(src).hasClass('chzn-done'))  || ($('#'+$($(src).prop('id')+' option').length > 2))){
+								$(src).trigger('change');
+								newArrayAutoPreviousSelectCmbflag.push($(src).prop('id'));
+								setValueInAutoPreviousSelectCmb =true;
+							}
+						}		
+
+						if(gPreSelectionArrayList[i]["id"]==$(src).prop('id') && setValueInAutoPreviousSelectCmb==true){
+							gPreSelectionArrayList.splice(gPreSelectionArrayList[i]["id"],1);
+						}
+					}
+
+				}
+				console.log("last : "+gPreSelectionArrayList);
+
+				if(gPreSelectionArrayList!=null && gPreSelectionArrayList!=undefined){
+					for(var i=0; i<newArrayAutoPreviousSelectCmbflag.length;i++){
+						for(var j=0; j<gPreSelectionArrayList.length;j++){
+							if((gPreSelectionArrayList[j]["id"] !=newArrayAutoPreviousSelectCmbflag[i])){
+								autoPreviousSelectCmbflag=true;
+							}
+						}
+					}
+				}else{
+					autoPreviousSelectCmbflag=true;
+				}
+
+				recursive();
+
+				if(autoPreviousSelectCmbflag==true){
+					setTimeout(function(){
+						gPreSelectionArrayList=null;
+						newArrayAutoPreviousSelectCmbflag=null;
+						AutoPreviousSelectionsChangeEventBind();
+					},300);
+				}
+			}
+		},200);
+	}
+}*/
+
+/*
+class BreadcrumbComponent extends React.Component {
+	  constructor(props) {
+	    super(props);
+	    this.state = {
+	    	breadcrumb:document.title,
+	    	time:"",
+	    	timeInMillis:this.props.timestamp,
+	    	startMarkCls:'fa fa-star-o-menu',
+		  	startMarkTitle:'Add to Shortcut'
+	    };
+	    
+	    this.timer = 0;
+		this.bookmarkStartClickEvent = this.bookmarkStartClickEvent.bind(this);
+	  }
+
+	  componentDidMount() {
+		  this.breadcrumbText();
+	  }
+	  
+	  render() {
+
+		  let DropdownListComp = () => (<span className="btn-group pull-right" style={{marginLeft:'10px'}} id="menuMaster-DropDown">
+			<span className="dropdown-toggle btn btn-inverse btn-mini" data-toggle="dropdown"><i className="fa fa-ellipsis-v fa-lg" aria-hidden="true"></i></span>
+			<ul className="dropdown-menu">
+			<li><a href="javascript:void(0)" onClick={breadcrumbSideMenuOptions(5)}>
+			 	<div className="material-switch-chk" style={{margin:"0px 0px"}}><input id="chkPreSelectionKirn" type="checkbox" checked={gPreSelectionArrayList!=null?'checked':''}/>
+			 	<label className="label-success"></label></div> <b style={{marginLeft:'33px'}} title="Auto Previous Selection"> Auto Selection</b></a></li>
+			</ul>
+			</span>
+			);
+		  
+		  
+		  //	- {this.props.headerlinktype} -
+		  var headerlinktypeList = ['student', 'orgadmin','parentadmin'
+		                            ,'alumniadmin','applicantStudent','applicantEmployee'
+		                            ,'alumnistudent','vendor','companyHR','referee','occupant'
+		                            , 'hrAdmin'];
+		  if(headerlinktypeList.includes(this.props.headerlinktype)){
+			  return (<React.Fragment>
+			  	{this.state.breadcrumb} 
+			  	<b style={{fontSize:'13px'}} className="pull-right">{this.state.time}</b>
+			  	<b style={{fontSize:'13px',marginRight:'5px'}} id="timelable" className="pull-right">{this.state.dateString}</b>
+			  </React.Fragment>);
+		  }else{
+			  this.state.startMarkCls = 'fa fa-star-o-menu';
+			  this.state.startMarkTitle = 'Add to Shortcut';
+			  if(menuShortcutId!=0 && menuShortcutId!="0" && menuShortcutId!=undefined){
+				  this.state.startMarkCls = 'fa fa-star-menu';
+				  this.state.startMarkTitle = 'Remove from Shortcut'; 
+			  }
+			  
+			  return (<React.Fragment>
+			  	<i className={this.state.startMarkCls} title={this.state.startMarkTitle} id='selectedMenuId' onClick={(e)=>this.bookmarkStartClickEvent(pid)} style={{cursor:'pointer', marginRight:'5px'}}></i>
+			  	
+			  	{this.state.breadcrumb}
+			  	
+			  	<b style={{fontSize:'13px'}} className="pull-right">{this.state.time}</b>
+			  	
+			  	<b style={{fontSize:'13px',marginRight:'5px'}} id="timelable" className="pull-right">{this.state.dateString}</b>
+			  	<DropdownListComp />
+			  </React.Fragment>);
+		  }
+	  }
+	  
+	  breadcrumbText() {
+		  var loc = window.location.pathname;
+		  loc = loc.substring(loc.lastIndexOf('/') + 1);
+		  var currentObject = $('#global-nav-id').find('a[href ="' + loc + '"]');
+		  var breadCrum = new Array();
+		  breadCrum.push(currentObject.text());
+		  console.log($(currentObject).attr("pid"));
+		  pid = $(currentObject).attr("pid");
+		  menuShortcutId = $(currentObject).attr("menuShortcutId");
+		  while (currentObject.parent().parent().prev().prop('tagName') == 'A') {
+			  breadCrum.push(currentObject.parent().parent().prev().text());
+			  currentObject = currentObject.parent().parent().prev();
+		  }
+		  var temp = new Array();
+		  for(var i in breadCrum){
+			  temp.push(breadCrum.pop());
+		  }
+		  var breadCrumbsTx = temp.join(" » ");
+		  if(temp.length==0){
+			  breadCrumbsTx=document.title;
+		  }
+		  this.setState({
+			  breadcrumb:breadCrumbsTx
+		  });
+	  }
+	  
+	 bookmarkStartClickEvent(menuMasterId){
+			if($('#selectedMenuId').hasClass('fa-star-o-menu')){
+				var isForShortcut = true;
+				this.state.startMarkCls = 'fa fa-star-menu';
+				this.state.startMarkTitle = 'Remove from Shortcut';
+				$.ajax({
+					url:'addSelectedMenuInShortcut.json?menuMasterId='+menuMasterId,
+					dataType:'json',
+					async:true,
+					success:function(jArray){
+						$('.shortcutMenuLink').remove(); 
+						getMenuList(isForShortcut);
+					},
+					error:function(){
+						getCustomAlertMessage("alert_error");
+					}
+				});
+			}else if($('#selectedMenuId').hasClass('fa-star-menu')){
+				var isForShortcut = true;
+				this.state.startMarkCls = 'fa fa-star-o-menu';
+				this.state.startMarkTitle = 'Add to Shortcut';
+				
+				$.ajax({
+					url:'deleteSelectedMenuInShortcut.json?menuMasterId='+menuMasterId,
+					dataType:'json',
+					async:true,
+					success:function(jArray){
+						$('.shortcutMenuLink').remove(); 
+						getMenuList(isForShortcut);
+					},
+					error:function(){
+						getCustomAlertMessage("alert_error");
+					}
+				});
+			}
+	 }
+}
+
+class TimerCounter extends React.Component {
+	  constructor(props) {
+	    super(props);
+	    this.state = {
+	    	time:"",
+	    	timeInMillis:this.props.timestamp
+	    };
+	    this.timer = 0;
+		this.countDown = this.countDown.bind(this);
+	  }
+	  componentDidMount() {
+		  var datetimeObj = new Date(this.props.timestamp);
+		  this.setState({ 
+			  time: datetimeObj.toLocaleTimeString(),
+			  timeInMillis:this.props.timestamp,
+			  dateString: datetimeObj.toJunoDateFormat(),
+		  });
+		  setInterval(this.countDown, 1000);
+	  }
+	  
+	  render() {
+			  return (<React.Fragment>
+			  	<b style={{fontSize:'13px'}} className="pull-right">{this.state.time}</b>
+			  	<b style={{fontSize:'13px',marginRight:'5px'}} id="timelable" className="pull-right">{this.state.dateString}</b>
+			  	<DropdownListComp />
+			  </React.Fragment>);
+	  }
+	  countDown() {
+			var datetimeObj = new Date(this.state.timeInMillis + 1000);
+			this.setState({ 
+				time: datetimeObj.toLocaleTimeString(),
+				timeInMillis:this.state.timeInMillis+1000,
+				dateString: datetimeObj.toJunoDateFormat()
+			});
+	 }
+}*/
+
